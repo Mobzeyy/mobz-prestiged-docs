@@ -26,7 +26,9 @@ Includes **dynamic XP/UI bars, 200 prestige badges, 18 buffs, rewards, killstrea
   🛡️ Level 2
   [█████░░░░░░░░░] 200 / 250 POINTS
 
-  https://i.postimg.cc/d1r7xT0G/2025-10-0613-45-29-ezgif-com-video-to-gif-converter-2.gif
+
+  ![2025-10-0613-45-29-ezgif com-video-to-gif-converter (2)](https://github.com/user-attachments/assets/54f9d95b-7427-4a7b-b7a7-be3606657733)
+
 ---------------------------------------------------------------------------------------------
 ### 💪 Buff System
 - Includes 18 default buffs (damage, defense, stamina, health regen, etc).
