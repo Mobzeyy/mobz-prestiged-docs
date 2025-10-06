@@ -24,7 +24,7 @@ Includes **dynamic XP/UI bars, 200 prestige badges, 18 buffs, rewards, killstrea
 - Enable/disable level-up pop
 
   🛡️ Level 2
-  [█████░░░░░░░░░] 200 / 100 LEVEL
+  [█████░░░░░░░░░] 200 / 250 POINTS
 ---------------------------------------------------------------------------------------------
 ### 💪 Buff System
 - Includes 18 default buffs (damage, defense, stamina, health regen, etc).
@@ -525,11 +525,11 @@ end)
 
 ## 📄 License
 
-MIT License — free to use, modify, and distribute with attribution.
+MIT License — free to use API, modify, and distribute with attribution.
 
 💬 Credits
 Developed by Mobz Development
-GitHub: coming soon
+
 Tebex Store: [https://mobz.tebex.io/](https://mobz.tebex.io/)
 
 ---------------------------------------------------------------------------------------------
