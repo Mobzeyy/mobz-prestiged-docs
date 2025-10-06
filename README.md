@@ -112,60 +112,424 @@ Includes **dynamic XP/UI bars, 200 prestige badges, 18 buffs, rewards, killstrea
 - buffs.lua and rewards.lua are intentionally open for customization.
 - Badges (prestiged1 → prestiged200) can be extended by adding new entries in your .ypt.
 ---------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------
-## 🔧 Exports System Server Side
 
-| **Export Name**         | **Type**        | **Description**                                   | **Arguments**                 | **Returns / Notes**                  | **Example Usage (Client)**                                                              |
-| ----------------------- | --------------- | ------------------------------------------------- | ----------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------- |
-| `SaveProgress_cl`       | Modifier        | Sends current points/level to server for saving   | `identifier`                  | none                                 | `exports["mobz-prestiged"]:SaveProgress_cl(identifier)`                                 |
-| `AddKill_cl`            | Modifier        | Adds a kill or NPC kill locally                   | `identifier, isNpc`           | none                                 | `exports["mobz-prestiged"]:AddKill_cl(identifier, false)`                               |
-| `AddDeath_cl`           | Modifier        | Adds a death and resets killstreak                | `identifier`                  | none                                 | `exports["mobz-prestiged"]:AddDeath_cl(identifier)`                                     |
-| `UnlockAchievement_cl`  | Modifier        | Unlocks achievement locally                       | `identifier, achievementName` | none                                 | `exports["mobz-prestiged"]:UnlockAchievement_cl(identifier, "first_blood")`             |
-| `UnlockTitle_cl`        | Modifier        | Unlocks a title locally                           | `identifier, titleName`       | none                                 | `exports["mobz-prestiged"]:UnlockTitle_cl(identifier, "champion")`                      |
-| `SetMugshot_cl`         | Modifier        | Sets the mugshot image locally                    | `identifier, mugshot`         | none                                 | `exports["mobz-prestiged"]:SetMugshot_cl(identifier, "hero.png")`                       |
-| `AddBuff_cl`            | Modifier        | Adds a buff with optional label                   | `identifier, buffName, label` | none                                 | `exports["mobz-prestiged"]:AddBuff_cl(identifier, "speed", "Speed Boost")`              |
-| `RemoveBuff_cl`         | Modifier        | Removes a buff locally                            | `identifier, buffName`        | none                                 | `exports["mobz-prestiged"]:RemoveBuff_cl(identifier, "speed")`                          |
-| `ClearBuffs_cl`         | Modifier        | Clears all buffs locally                          | `identifier`                  | none                                 | `exports["mobz-prestiged"]:ClearBuffs_cl(identifier)`                                   |
-| `SetPrestige_cl`        | Modifier        | Sets prestige locally                             | `identifier, prestige`        | none                                 | `exports["mobz-prestiged"]:SetPrestige_cl(identifier, 2)`                               |
-| `GetLevel_cl`           | Getter          | Returns local level                               | `identifier`                  | `number`                             | `local lvl = exports["mobz-prestiged"]:GetLevel_cl(identifier)`                         |
-| `GetPoints_cl`          | Getter          | Returns local points                              | `identifier`                  | `number`                             | `local pts = exports["mobz-prestiged"]:GetPoints_cl(identifier)`                        |
-| `GetKills_cl`           | Getter          | Returns local kills                               | `identifier`                  | `number`                             | `local kills = exports["mobz-prestiged"]:GetKills_cl(identifier)`                       |
-| `GetNpcKills_cl`        | Getter          | Returns local NPC kills                           | `identifier`                  | `number`                             | `local npckills = exports["mobz-prestiged"]:GetNpcKills_cl(identifier)`                 |
-| `GetDeaths_cl`          | Getter          | Returns local deaths                              | `identifier`                  | `number`                             | `local deaths = exports["mobz-prestiged"]:GetDeaths_cl(identifier)`                     |
-| `GetKillstreak_cl`      | Getter          | Returns local killstreak                          | `identifier`                  | `number`                             | `local streak = exports["mobz-prestiged"]:GetKillstreak_cl(identifier)`                 |
-| `GetAchievements_cl`    | Getter          | Returns local achievements table                  | `identifier`                  | `table`                              | `local ach = exports["mobz-prestiged"]:GetAchievements_cl(identifier)`                  |
-| `GetTitles_cl`          | Getter          | Returns local titles table                        | `identifier`                  | `table`                              | `local titles = exports["mobz-prestiged"]:GetTitles_cl(identifier)`                     |
-| `GetMugshot_cl`         | Getter          | Returns local mugshot                             | `identifier`                  | `string`                             | `local img = exports["mobz-prestiged"]:GetMugshot_cl(identifier)`                       |
-| `GetPlayerVisuals_cl`   | Getter          | Returns active foot effects and killstreak labels | `identifier`                  | `table` with `{activeEffect, label}` | `local visuals = exports["mobz-prestiged"]:GetPlayerVisuals_cl(identifier)`             |
-| `GetLevelMultiplier_cl` | Utility / Async | Requests dynamic multiplier from server           | `factor, callback(mult)`      | `number` via callback                | `exports["mobz-prestiged"]:GetLevelMultiplier_cl(0.05, function(mult) print(mult) end)` |
+
+# 🏆 Mobz-Prestiged Documentation
 
 ---------------------------------------------------------------------------------------------
+
+## 📑 Table of Contents
+
+1. [Server Exports](#server-exports-reference)
+
+   * [Core Data Functions](#core-data-functions)
+   * [Basic Getters](#basic-getters)
+   * [Modifiers](#modifiers)
+   * [Buff System](#buff-system)
+   * [Achievements & Titles](#achievements--titles)
+   * [Visuals & Prestige Info](#visuals--prestige-info)
+   * [Multipliers](#multipliers)
+   * [Leaderboards](#leaderboards)
+   * [Online / Offline Data](#online--offline-data)
+   * [Saving Progression](#saving-progression)
+   * [Developer Tips](#developer-tips)
+2. [Client Exports](#client-exports-reference)
+
+   * [Core Data Functions](#core-data-functions-1)
+   * [Stats Getters](#stats-getters)
+   * [Stats Modifiers](#stats-modifiers)
+   * [Buff System](#buff-system-1)
+   * [Visuals & Effects](#visuals--effects)
+   * [Multipliers](#multipliers-1)
+   * [Data Sync](#data-sync)
+   * [Developer Tips](#developer-tips-1)
+3. [License](#license)
+
 ---------------------------------------------------------------------------------------------
-## 🔧 Exports System Client Side
 
-| Export                                              | Arguments              | Returns | Description                                             |
-| --------------------------------------------------- | ---------------------- | ------- | ------------------------------------------------------- |
-| `AddPoints_cl(identifier, amount)`                  | string, number         | nil     | Add XP to a player (syncs to server).                   |
-| `RemovePoints_cl(identifier, amount)`               | string, number         | nil     | Remove XP from a player (syncs to server).              |
-| `SetLevel_cl(identifier, level)`                    | string, number         | nil     | Set player level directly (syncs to server).            |
-| `SaveProgress_cl(identifier)`                       | string                 | nil     | Save current player progression to server.              |
-| `AddKill_cl(identifier, isNpc)`                     | string, bool           | nil     | Add kill for player or NPC, updates killstreak locally. |
-| `AddDeath_cl(identifier)`                           | string                 | nil     | Add death and reset killstreak locally.                 |
-| `UnlockAchievement_cl(identifier, achievementName)` | string, string         | nil     | Unlock a specific achievement locally.                  |
-| `UnlockTitle_cl(identifier, titleName)`             | string, string         | nil     | Unlock a specific title locally.                        |
-| `SetMugshot_cl(identifier, mugshot)`                | string, string         | nil     | Set a custom mugshot locally.                           |
-| `AddBuff_cl(identifier, buffName, label)`           | string, string, string | nil     | Add a buff to player locally.                           |
-| `RemoveBuff_cl(identifier, buffName)`               | string, string         | nil     | Remove a buff locally by name.                          |
-| `ClearBuffs_cl(identifier)`                         | string                 | nil     | Clear all buffs locally.                                |
-| `SetPrestige_cl(identifier, prestige)`              | string, number         | nil     | Set player prestige locally.                            |
-| `GetLevel_cl(identifier)`                           | string                 | number  | Returns player level locally.                           |
-| `GetPoints_cl(identifier)`                          | string                 | number  | Returns player points locally.                          |
-| `GetKills_cl(identifier)`                           | string                 | number  | Returns player kills locally.                           |
-| `GetNpcKills_cl(identifier)`                        | string                 | number  | Returns player NPC kills locally.                       |
-| `GetDeaths_cl(identifier)`                          | string                 | number  | Returns player deaths locally.                          |
-| `GetKillstreak_cl(identifier)`                      | string                 | number  | Returns current killstreak locally.                     |
-| `GetAchievements_cl(identifier)`                    | string                 | table   | Returns unlocked achievements locally.                  |
-| `GetTitles_cl(identifier)`                          | string                 | table   | Returns unlocked titles locally.                        |
-| `GetMugshot_cl(identifier)`                         | string                 | string  | Returns mugshot path locally.                           |
-| `GetPlayerVisuals_cl(identifier)`                   | string                 | table   | Returns foot effects + killstreak label locally.        |
+# 📡 Server Exports Reference
 
+Below is a full list of server-side exports available through:
+
+```lua
+exports["mobz-prestiged"]:ExportName(...)
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🧠 Core Data Functions
+
+### ✅ EnsurePlayerDataServer(identifier)
+
+Ensures a player's data exists and returns it (used internally).
+
+```lua
+local data = exports["mobz-prestiged"]:GetLevel_sv("steam:110000112345678")
+print(data.level)
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🧾 Basic Getters
+
+| Export                                | Description                           | Returns  |
+| ------------------------------------- | ------------------------------------- | -------- |
+| `GetLevel_sv(identifier)`             | Returns player’s current level        | `number` |
+| `GetPoints_sv(identifier)`            | Returns total points                  | `number` |
+| `GetKills_sv(identifier)`             | Returns total player kills            | `number` |
+| `GetNpcKills_sv(identifier)`          | Returns total NPC kills               | `number` |
+| `GetDeaths_sv(identifier)`            | Returns total deaths                  | `number` |
+| `GetKillstreak_sv(identifier)`        | Returns current killstreak            | `number` |
+| `GetPrestige_sv(identifier)`          | Returns prestige rank                 | `number` |
+| `GetPlaytime_sv(identifier)`          | Total playtime in seconds             | `number` |
+| `GetPlaytimeFormatted_sv(identifier)` | Returns formatted playtime as `HH:MM` | `string` |
+
+**Example:**
+
+```lua
+local kills = exports["mobz-prestiged"]:GetKills_sv(identifier)
+print(("Player has %d kills"):format(kills))
+```
+
+---------------------------------------------------------------------------------------------
+
+## ⚔️ Modifiers
+
+| Export                                 | Description                                  |
+| -------------------------------------- | -------------------------------------------- |
+| `AddKill_sv(identifier, isNpc)`        | Adds a kill to either player or NPC category |
+| `AddDeath_sv(identifier)`              | Adds a death and resets killstreak           |
+| `SetPrestige_sv(identifier, prestige)` | Sets prestige and updates labels/icons       |
+
+**Example:**
+
+```lua
+local id = GetPrimaryIdentifier(source)
+exports["mobz-prestiged"]:AddKill_sv(id, false)
+exports["mobz-prestiged"]:AddDeath_sv(id)
+exports["mobz-prestiged"]:SetPrestige_sv(id, 2)
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🧪 Buff System
+
+| Export                                    | Description                     |
+| ----------------------------------------- | ------------------------------- |
+| `AddBuff_sv(identifier, buffName, label)` | Adds a buff with optional label |
+| `RemoveBuff_sv(identifier, buffName)`     | Removes a specific buff         |
+| `ClearBuffs_sv(identifier)`               | Removes all buffs               |
+
+**Example:**
+
+```lua
+local id = GetPrimaryIdentifier(source)
+exports["mobz-prestiged"]:AddBuff_sv(id, "damage_boost", "🔥 Damage Boost")
+exports["mobz-prestiged"]:RemoveBuff_sv(id, "damage_boost")
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🏅 Achievements & Titles
+
+| Export                                          | Description                   |
+| ----------------------------------------------- | ----------------------------- |
+| `UnlockAchievement_sv(identifier, achievement)` | Unlocks specific achievement  |
+| `UnlockTitle_sv(identifier, title)`             | Unlocks a title               |
+| `GetAchievements_sv(identifier)`                | Returns all achievements data |
+| `GetTitles_sv(identifier)`                      | Returns all unlocked titles   |
+
+**Example:**
+
+```lua
+local id = GetPrimaryIdentifier(source)
+exports["mobz-prestiged"]:UnlockAchievement_sv(id, 5)
+exports["mobz-prestiged"]:UnlockTitle_sv(id, "Elite Slayer")
+
+local achievements = exports["mobz-prestiged"]:GetAchievements_sv(id)
+for lvl, data in pairs(achievements) do
+    print(("Achievement %s: %s"):format(lvl, data.unlocked and "Unlocked" or "Locked"))
+end
+```
+
+---------------------------------------------------------------------------------------------
+
+## 👑 Visuals & Prestige Info
+
+| Export                            | Description                                       |
+| --------------------------------- | ------------------------------------------------- |
+| `GetPlayerVisuals_sv(identifier)` | Returns mugshot, prestige icon, and active effect |
+
+**Example:**
+
+```lua
+local visuals = exports["mobz-prestiged"]:GetPlayerVisuals_sv(identifier)
+print(json.encode(visuals))
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🧮 Multipliers
+
+| Export                                 | Description                                      |
+| -------------------------------------- | ------------------------------------------------ |
+| `GetMultiplier_sv(identifier, factor)` | Returns dynamic multiplier based on player level |
+
+**Example:**
+
+```lua
+local id = GetPrimaryIdentifier(source)
+local mult = exports["mobz-prestiged"]:GetMultiplier_sv(id, 0.02)
+print("XP Multiplier:", mult)
+```
+
+---------------------------------------------------------------------------------------------
+
+## 📊 Leaderboards
+
+| Export                         | Sorted By             | Example Return                              |
+| ------------------------------ | --------------------- | ------------------------------------------- |
+| `GetTopPoints_sv(limit)`       | Points                | `{ {identifier, name, points}, ... }`       |
+| `GetTopLevels_sv(limit)`       | Level                 | `{ {identifier, name, level}, ... }`        |
+| `GetTopKills_sv(limit)`        | Kills                 | `{ {identifier, name, kills}, ... }`        |
+| `GetTopAchievements_sv(limit)` | Achievements unlocked | `{ {identifier, name, achievements}, ... }` |
+
+**Example:**
+
+```lua
+local topKills = exports["mobz-prestiged"]:GetTopKills_sv(5)
+for _, player in ipairs(topKills) do
+    print(("[%s] %s - %d kills"):format(player.identifier, player.name, player.kills))
+end
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🌐 Online / Offline Data
+
+| Export                        | Description                           |
+| ----------------------------- | ------------------------------------- |
+| `GetOnlinePlayersStats_sv()`  | Returns stats for all online players  |
+| `GetOfflinePlayersStats_sv()` | Returns stats for all offline players |
+
+**Example:**
+
+```lua
+local online = exports["mobz-prestiged"]:GetOnlinePlayersStats_sv()
+print(json.encode(online))
+```
+
+---------------------------------------------------------------------------------------------
+
+## 💾 Saving Progression
+
+| Export              | Description                                                        |
+| ------------------- | ------------------------------------------------------------------ |
+| `SaveProgress_sv()` | Triggers manual data save (optional override for JSON persistence) |
+
+**Example:**
+
+```lua
+exports["mobz-prestiged"]:SaveProgress_sv()
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🧰 Developer Tips
+
+* Always ensure `GetPrimaryIdentifier(source)` returns valid identifiers (`steam:`, `license:`, etc.).
+* Use `EnsurePlayerDataServer` only internally.
+* Hook this system with your own XP/leveling logic and UI displays.
+* Add persistence by implementing JSON saving in `SaveProgression()`.
+
+---------------------------------------------------------------------------------------------
+
+# 📡 Client Exports Reference
+
+Below is a full list of client-side exports available through:
+
+```lua
+exports["mobz-prestiged"]:ExportName(...)
+```
+
+---------------------------------------------------------------------------------------------
+
+# 🏆 Mobz-Prestiged Documentation (Client Exports)
+
+---------------------------------------------------------------------------------------------
+
+## 📄 Client Exports Reference
+
+Below is a full list of client-side exports available through:
+
+```lua
+exports["mobz-prestiged"]:ExportName(...)
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🧠 Core Data Functions
+
+### ✅ EnsurePlayerDataClient(identifier)
+
+Ensures local player data exists and initializes defaults if missing.
+
+**Example:**
+
+```lua
+local id = GetPlayerServerId(PlayerId())
+local pdata = EnsurePlayerDataClient(id)
+print(pdata.level) -- prints current level
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🧾 Stats Getters
+
+| Export                           | Description        | Returns  |
+| -------------------------------- | ------------------ | -------- |
+| `GetKills_cl(identifier)`        | Total player kills | `number` |
+| `GetNpcKills_cl(identifier)`     | Total NPC kills    | `number` |
+| `GetDeaths_cl(identifier)`       | Total deaths       | `number` |
+| `GetKillstreak_cl(identifier)`   | Current killstreak | `number` |
+| `GetAchievements_cl(identifier)` | Achievements table | `table`  |
+| `GetTitles_cl(identifier)`       | Titles table       | `table`  |
+| `GetLevel_cl()`                  | Current level      | `number` |
+| `GetPoints_cl()`                 | Current points     | `number` |
+
+**Example:**
+
+```lua
+local kills = exports["mobz-prestiged"]:GetKills_cl(identifier)
+print("You have " .. kills .. " kills!")
+```
+
+---------------------------------------------------------------------------------------------
+
+## ⚔️ Stats Modifiers
+
+| Export                                              | Description                        |
+| --------------------------------------------------- | ---------------------------------- |
+| `AddKill_cl(identifier, isNpc)`                     | Adds a kill (player or NPC)        |
+| `AddDeath_cl(identifier)`                           | Adds a death and resets killstreak |
+| `UnlockAchievement_cl(identifier, achievementName)` | Unlocks an achievement locally     |
+| `UnlockTitle_cl(identifier, titleName)`             | Unlocks a title locally            |
+| `SetPrestige_cl(identifier, prestige)`              | Updates prestige level and icon    |
+
+**Example:**
+
+```lua
+local id = GetPlayerServerId(PlayerId())
+exports["mobz-prestiged"]:AddKill_cl(id, false)
+exports["mobz-prestiged"]:AddDeath_cl(id)
+exports["mobz-prestiged"]:UnlockAchievement_cl(id, "First Blood")
+exports["mobz-prestiged"]:SetPrestige_cl(id, 2)
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🧪 Buff System
+
+| Export                                    | Description                    |
+| ----------------------------------------- | ------------------------------ |
+| `AddBuff_cl(identifier, buffName, label)` | Add a buff with optional label |
+| `RemoveBuff_cl(identifier, buffName)`     | Remove a buff                  |
+| `ClearBuffs_cl(identifier)`               | Remove all buffs               |
+
+**Example:**
+
+```lua
+exports["mobz-prestiged"]:AddBuff_cl(id, "speed_boost", "🏎️ Speed Boost")
+exports["mobz-prestiged"]:RemoveBuff_cl(id, "speed_boost")
+exports["mobz-prestiged"]:ClearBuffs_cl(id)
+```
+
+---------------------------------------------------------------------------------------------
+
+## 👑 Visuals & Effects
+
+### `GetPlayerVisuals_cl(playerId)`
+
+Returns visual info like active foot effects and killstreak labels.
+
+**Returns Table Example:**
+
+```lua
+{
+    activeEffect = {
+        particleDict = "core",
+        particleName = "fire_trail",
+        scale = 1.0
+    },
+    label = {
+        label = "Rampage",
+        color = {255,0,0},
+        scale = 0.5,
+        heightOffset = 2.0
+    }
+}
+```
+
+**Example:**
+
+```lua
+local visuals = exports["mobz-prestiged"]:GetPlayerVisuals_cl(id)
+if visuals.label then
+    print("Current Killstreak Label:", visuals.label.label)
+end
+```
+
+---------------------------------------------------------------------------------------------
+
+## 🧮 Multipliers
+
+### `GetLevelMultiplier_cl(factor, callback)`
+
+Requests a multiplier from the server based on player level.
+
+**Example:**
+
+```lua
+exports["mobz-prestiged"]:GetLevelMultiplier_cl(0.02, function(mult)
+    print("XP multiplier:", mult)
+end)
+```
+
+---------------------------------------------------------------------------------------------
+
+## 💾 Data Sync
+
+### `mobz-prestiged:syncPlayerData`
+
+Event used to update client data from the server.
+
+**Example:**
+
+```lua
+RegisterNetEvent("mobz-prestiged:syncPlayerData")
+AddEventHandler("mobz-prestiged:syncPlayerData", function(identifier, newData)
+    print("Data synced for:", identifier)
+end)
+```
+
+---------------------------------------------------------------------------------------------
+
+## 💡 Developer Tips
+
+* Use client exports to query or modify local data for UI or gameplay effects.
+* Sync always comes from the server via `mobz-prestiged:syncPlayerData`.
+* Buffs and killstreaks are purely client-side visual and gameplay effects.
+* Always pass valid identifier (server ID) when using exports.
+
+---------------------------------------------------------------------------------------------
+
+## 📄 License
+
+MIT License — free to use, modify, and distribute with attribution.
+
+💬 Credits
+Developed by Mobz Development
+GitHub: coming soon
+Tebex Store: [https://mobz.tebex.io/](https://mobz.tebex.io/)
+
+---------------------------------------------------------------------------------------------
