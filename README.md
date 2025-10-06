@@ -26,6 +26,10 @@ Includes **dynamic XP/UI bars, 200 prestige badges, 18 buffs, rewards, killstrea
   🛡️ Level 2
   [█████░░░░░░░░░] 200 / 250 POINTS
 
+<img width="294" height="39" alt="b1" src="https://github.com/user-attachments/assets/e42a1503-4417-47fb-a100-5b5315df9dcd" />
+<img width="299" height="52" alt="b2" src="https://github.com/user-attachments/assets/a7270b7d-efcd-4522-a5d1-0a5e3b293c36" />
+<img width="304" height="53" alt="b3" src="https://github.com/user-attachments/assets/2860a7a7-c509-4c6f-afd5-184589ce8f4c" />
+
 
   ![2025-10-0613-45-29-ezgif com-video-to-gif-converter (2)](https://github.com/user-attachments/assets/54f9d95b-7427-4a7b-b7a7-be3606657733)
 
@@ -88,6 +92,10 @@ Includes **dynamic XP/UI bars, 200 prestige badges, 18 buffs, rewards, killstrea
 - Synced badge display above players’ heads.
 - Configurable animations, styles, and positioning.
 - Roman numeral level display support.
+<img width="1135" height="560" alt="fulllist1" src="https://github.com/user-attachments/assets/33b64d70-961c-4b7b-8982-d028218a50d1" />
+
+- <img width="1146" height="422" alt="fulllist2" src="https://github.com/user-attachments/assets/cde29ab6-2023-4821-bf66-f40da368637b" />
+
 ---------------------------------------------------------------------------------------------
 ## 🛠️ Admin Management
 - Admin panel to:
