@@ -41,6 +41,34 @@ Includes **dynamic XP/UI bars, 200 prestige badges, 18 buffs, rewards, killstrea
 - Optional on-screen Buff HUD:
 - Dynamic progress bars for each buff until maxed out.
 - Fully configurable in config.lua.
+
+- | Buff Name                	| Max Effect | What It Does                                               | Balance Check  |
+| ------------------------ 	| ---------- | ---------------------------------------------------------- | -------------- |
+| 🏊 **Swimming**          	| 1.5x       | Swim up to 50% faster. Useful for escapes/diving.          | ✅ Balanced     |
+| 🏃 **Running**           	| 1.5x       | Sprint 50% faster. Big advantage in chases, but fair.      | ✅ Fair         |
+| ❤️ **Health Regen**      	| 1.25x      | Slightly quicker healing, not instant. Keeps fights tense. | ✅ Safe         |
+| 🕵️ **Stealth**           	| 1.5x       | Reduced footstep noise. Sneakier, not invisible.           | ✅ Balanced     |
+| 💪 **Strength**          	| 2.0x       | Unarmed punches deal double damage at best.                | ✅ Fair         |
+| 🦘 **Super Jump**        	| 1.6x       | Jump higher to reach ledges. No “flying.”                  | ✅ Fun but safe |
+| 💨 **Stamina**           	| 1.5x       | Run longer without tiring.                                 | ✅ Fair         |
+| 🔥 **Fire Resistance**   	| 1.5x       | Take less fire damage.                                     | ✅ Balanced     |
+| 💥 **Explosion Resist.** 	| 1.5x       | Take less damage from explosions.                          | ✅ Balanced     |
+| 🛡 **Melee Resistance**  	| 1.5x       | Take less melee damage.                                    | ✅ Balanced     |
+| 🪓 **Melee Damage**      	| 1.5x       | Melee swings deal 50% more damage.                         | ✅ Balanced     |
+| 🔫 **Weapon Damage**     	| 1.15x      | Guns deal up to 15% more damage.                           | ✅ Very fair    |
+| 🛡 **Weapon Defense**    	| 1.5x       | Reduce incoming gun damage.                                | ✅ Balanced     |
+| 🥋 **Melee Defense**     	| 1.5x       | Reduce incoming melee damage.                              | ✅ Balanced     |
+| 🚗 **Vehicle Armor**     	| 1.5x       | Cars take less damage.                                     | ✅ Balanced     |
+| 🚙 **Vehicle Handling**  	| 1.3x       | Vehicles grip/corner better.                               | ✅ Balanced     |
+| 🏎 **Vehicle Speed**     	| 1.2x       | Cars go slightly faster (20% max).                         | ✅ Fair         |
+
+
+	🏁 Final Verdict
+
+	Strong but not OP – rewards grinding without breaking PvP.
+	Safe caps prevent godmode or broken vehicles.
+	Perfect mix of fun + balance.
+
 ---------------------------------------------------------------------------------------------
 ## 🎁 Rewards System
 - Open-source `rewards.lua` with optional reward tiers.
